@@ -1,11 +1,11 @@
-package router
+package router1
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
-	"time"
-	"io"
+	"strconv"
 )
 
 type Address struct{
@@ -22,8 +22,9 @@ type Student struct{
 	Address  Address `json:"address"`
 }
 
-func studentGet(w http.ResponseWriter,r *http.Request){
-	dummyData := Student{
+func StudentGet(w http.ResponseWriter,r *http.Request){
+	var dummyData []Student
+	dummyData = append(dummyData,Student{
 		Id: 1,
 		Name: "Stewy",
 		Age: 20,
@@ -33,13 +34,54 @@ func studentGet(w http.ResponseWriter,r *http.Request){
 			Province: "Unknown",
 			Country: "Japan",
 		},
-	}
+	})
 
+	dummyData = append(dummyData,Student{
+		Id: 2,
+		Name: "Robert",
+		Age: 22,
+		GPA: 2.9,
+		Address: Address{
+			Street: "21th Mallard Street",
+			Province: "Washington",
+			Country: "USA",
+		},
+	})
+	
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type","application/json")
 	json.NewEncoder(w).Encode(dummyData)
 }
 
-func studentPost(w http.ResponseWriter,r *http.Request){
+func StudentGetById(w http.ResponseWriter,r *http.Request){
+
+	studentId,err := strconv.Atoi(r.PathValue("id"))
+	if err!=nil{
+		http.Error(w,"Invalid path variable, expected to be Integer",http.StatusBadRequest)
+		return
+	}
+
+	dummyData := map[string]interface{}{
+		"studentId":studentId,
+		"student": Student{
+					Id: 1,
+					Name: "Stewy",
+					Age: 20,
+					GPA: 3.2,
+					Address: Address{
+						Street: "21th Orange Street",
+						Province: "Unknown",
+						Country: "Japan",
+					},
+				},
+	}
+
+	w.Header().Set("Content-Type","application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(dummyData)
+}
+
+func StudentPost(w http.ResponseWriter,r *http.Request){
 	body,_ := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -53,27 +95,40 @@ func studentPost(w http.ResponseWriter,r *http.Request){
 
 	w.Header().Set("Content-Type","application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"Message":"Successfully Created New Student"})
+	json.NewEncoder(w).Encode(map[string]string{"message":"successfully created new student"})
 }
 
-func studentPut(w http.ResponseWriter,r *http.Request){
-
-}
-
-func studentDelete(w http.ResponseWriter,r *http.Request){
-
-}
-
-func StudentRouter(w http.ResponseWriter,r *http.Request){
-	log.Printf("%v %v %v %v %v %v",r.Method,r.Host,r.URL,r.Body,r.UserAgent(),time.Now())
-	switch (r.Method){
-	case http.MethodGet:
-		studentGet(w,r)
-	case http.MethodPost:
-		studentPost(w,r)
-	case http.MethodPut:
-		studentPut(w,r)
-	case http.MethodDelete:
-		studentDelete(w,r)
+func StudentPut(w http.ResponseWriter,r *http.Request){
+	studentId,err := strconv.Atoi(r.PathValue("id"))
+	if err!=nil{
+		http.Error(w,"Invalid path variable, expected to be Integer",http.StatusBadRequest)
+		return
 	}
+
+	body,_ := io.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var student Student
+	if err:=json.Unmarshal(body,&student);err!=nil{
+		http.Error(w,"Invalid Json",http.StatusBadRequest)
+		return
+	}
+	student.Id = studentId
+	log.Println(student)
+
+	w.Header().Set("Content-Type","application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message":"successfully update student","studentId":strconv.Itoa(studentId)})
+}
+
+func StudentDelete(w http.ResponseWriter,r *http.Request){
+	studentId,err := strconv.Atoi(r.PathValue("id"))
+	if err!=nil{
+		http.Error(w,"Invalid path variable, expected to be Integer",http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type","application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message":"successfully delete student","studentId":strconv.Itoa(studentId)})
 }
