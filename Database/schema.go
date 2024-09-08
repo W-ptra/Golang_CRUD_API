@@ -1,8 +1,11 @@
 package database
 
-import "time"
+import (
+	"time"
+)
 
 type Address struct {
+	Id 		 int 		`gorm:"primaryKey;autoIncrement"`
 	Street   string
 	Province string
 	Country  string
@@ -13,6 +16,7 @@ type Student struct {
 	Name      string
 	Age       int
 	GPA       float64
-	Address   Address
+	AddressId int
+	Address   Address	`gorm:foreignKey:AddressId;referenceId`
 	CreatedAt time.Time
 }
