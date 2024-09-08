@@ -2,11 +2,16 @@ package database
 
 import (
 	"gorm.io/driver/postgres"
+	"github.com/joho/godotenv"
 	"gorm.io/gorm"
+	"fmt"
+	"os"
 )
 
 func GetConnection() (*gorm.DB,error){
-	dsn := "host=localhost user=root password=root dbname=golang port=8000 sslmode=disable TimeZone=Asia/Shanghai"
+	godotenv.Load()
+
+	dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=%v TimeZone=Asia/Shanghai",os.Getenv("DB_HOST"),os.Getenv("DB_USER"),os.Getenv("DB_PASSWORD"),os.Getenv("DB_NAME"),os.Getenv("DB_PORT"),os.Getenv("DB_SSLMODE"))
 	db,err := gorm.Open(postgres.Open(dsn),&gorm.Config{})
 
 	if err!=nil{
