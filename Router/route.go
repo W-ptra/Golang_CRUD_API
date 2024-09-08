@@ -9,17 +9,17 @@ import (
 )
 
 type Address struct{
-	Street string 	`json:"street"`
-	Province string	`json:"province"`
-	Country string	`json:"country"`
+	Street 		string 	`json:"street"`
+	Province 	string	`json:"province"`
+	Country 	string	`json:"country"`
 }
 
 type Student struct{
-	Id int			`json:"id"`
-	Name string		`json:"name"`
-	Age int			`json:"age"`
-	GPA float64		`json:"gpa"`
-	Address  Address `json:"address"`
+	Id 			int		`json:"id"`
+	Name 		string	`json:"name"`
+	Age 		int		`json:"age"`
+	GPA 		float64	`json:"gpa"`
+	Address  	Address	`json:"address"`
 }
 
 func StudentGet(w http.ResponseWriter,r *http.Request){
