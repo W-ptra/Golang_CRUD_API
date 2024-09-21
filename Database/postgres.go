@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -75,7 +74,6 @@ func GetStudentById(id int) (Student,error){
 }
 
 func UpdateStudentById(student Student) error{
-	fmt.Println(student.Id)
 	db,err := GetConnection()
 	if err!=nil{
 		return err
@@ -93,7 +91,6 @@ func UpdateStudentById(student Student) error{
 	studentDB.Province = student.Province
 	studentDB.Country = student.Country
 	
-
 	if err := db.Save(studentDB).Error; err != nil {
 		return err
 	}
@@ -106,5 +103,10 @@ func DeleteStudentById(id int) error{
 	if err!=nil{
 		return err
 	}
-	return db.Delete(&Student{},id).Error
+	student,err := GetStudentById(id)
+	if err!=nil{
+		return err
+	}
+
+	return db.Delete(&Student{},student.Id).Error
 }

@@ -23,7 +23,7 @@ type Student struct{
 	Country 	string	`json:"country"`
 }
 
-func setRespond(w http.ResponseWriter,r *http.Request,payload interface{},statusCode int){
+func setRespond(w http.ResponseWriter,payload interface{},statusCode int){
 	w.Header().Set("Content-Type","application/json")
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(payload)
@@ -32,25 +32,25 @@ func setRespond(w http.ResponseWriter,r *http.Request,payload interface{},status
 func StudentGet(w http.ResponseWriter,r *http.Request){
 	data,err := database.GetStudent()
 	if err != nil{
-		setRespond(w,r,Message{"Something went wrong"},500)
+		setRespond(w,Message{"Something went wrong"},500)
 		return
 	}
-	setRespond(w,r,data,200)
+	setRespond(w,data,200)
 }
 
 func StudentGetById(w http.ResponseWriter,r *http.Request){
 	studentId,err := strconv.Atoi(r.PathValue("id")) // get parameter value 
 	if err !=nil{
-		setRespond(w,r,Message{"Something went wrong"},500)
+		setRespond(w,Message{"Something went wrong"},500)
 		return
 	}
 
 	data,err := database.GetStudentById(studentId)
-	if err != nil{
-		setRespond(w,r,Message{"Student not found"},404)
+	if err != nil && err.Error() == "record not found"{
+		setRespond(w,Message{"Student not found"},404)
 		return
 	}
-	setRespond(w,r,data,200)
+	setRespond(w,data,200)
 }
 
 func StudentPost(w http.ResponseWriter,r *http.Request){
@@ -59,7 +59,7 @@ func StudentPost(w http.ResponseWriter,r *http.Request){
 
 	var student Student
 	if err := json.Unmarshal(body,&student);err!=nil{
-		setRespond(w,r,Message{"Invalid Json"},500)
+		setRespond(w,Message{"Invalid Json"},500)
 		return
 	}
 	log.Println(student)
@@ -74,16 +74,16 @@ func StudentPost(w http.ResponseWriter,r *http.Request){
 	err := database.CreateStudent(newStudent)
 
 	if err != nil{
-		setRespond(w,r,Message{"Something went wrong, can't create new student"},500)
+		setRespond(w,Message{"Something went wrong, can't create new student"},500)
 		return
 	}
-	setRespond(w,r,Message{"successfully created new student"},200)
+	setRespond(w,Message{"successfully created new student"},200)
 }
 
 func StudentPut(w http.ResponseWriter,r *http.Request){
 	studentId,err := strconv.Atoi(r.PathValue("id"))
 	if err!=nil{
-		setRespond(w,r,Message{"Invalid path variable, expected to be Integer"},400)
+		setRespond(w,Message{"Invalid path variable, expected to be Integer"},400)
 		return
 	}
 
@@ -92,7 +92,7 @@ func StudentPut(w http.ResponseWriter,r *http.Request){
 
 	var student Student
 	if err:=json.Unmarshal(body,&student);err!=nil{
-		setRespond(w,r,Message{"Invalid Json"},400)
+		setRespond(w,Message{"Invalid Json"},400)
 		return
 	}
 	student.Id = studentId
@@ -110,11 +110,11 @@ func StudentPut(w http.ResponseWriter,r *http.Request){
 
 	err = database.UpdateStudentById(newStudent)
 
-	if err != nil{
-		setRespond(w,r,Message{"Something went wrong, can't update student"},500)
+	if err != nil && err.Error() == "record not found"{
+		setRespond(w,Message{"student not found"},404)
 		return
 	}
-	setRespond(w,r,Message{"successfully update student"},200)
+	setRespond(w,Message{"successfully update student"},200)
 }
 
 func StudentDelete(w http.ResponseWriter,r *http.Request){
@@ -125,9 +125,9 @@ func StudentDelete(w http.ResponseWriter,r *http.Request){
 	}
 	err = database.DeleteStudentById(studentId)
 
-	if err != nil{
-		setRespond(w,r,Message{"Something went wrong, can't delete student"},500)
+	if err != nil && err.Error() == "record not found"{
+		setRespond(w,Message{"student not found"},404)
 		return
 	}
-	setRespond(w,r,Message{"successfully delete student"},200)
+	setRespond(w,Message{"successfully delete student"},200)
 }
