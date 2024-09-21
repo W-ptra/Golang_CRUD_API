@@ -9,7 +9,6 @@ type Student struct {
 	Name      string
 	Age       int
 	GPA       float64
-	AddressId int
 	Street    string
 	Province  string
 	Country   string

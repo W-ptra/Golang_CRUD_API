@@ -99,6 +99,7 @@ func StudentPut(w http.ResponseWriter,r *http.Request){
 	log.Println(student)
 
 	newStudent := database.Student{
+		Id: studentId,
 		Name: student.Name,
 		Age: student.Age,
 		GPA: student.GPA,

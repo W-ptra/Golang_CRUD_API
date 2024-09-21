@@ -1,11 +1,13 @@
 package database
 
 import (
-	"gorm.io/driver/postgres"
-	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var dbConnection *gorm.DB
@@ -73,18 +75,30 @@ func GetStudentById(id int) (Student,error){
 }
 
 func UpdateStudentById(student Student) error{
+	fmt.Println(student.Id)
 	db,err := GetConnection()
 	if err!=nil{
 		return err
 	}
-	return db.Model(&Student{}).Where("Id = ?",student.Id).Updates(Student{
-		Name: student.Name,
-		Age: student.Age,
-		GPA: student.GPA,
-		Street: student.Street,
-		Province: student.Province,
-		Country: student.Country,
-	}).Error
+	studentDB,err := GetStudentById(student.Id)
+	if err != nil{
+		log.Println(err)
+		return err
+	}
+
+	studentDB.Name = student.Name
+	studentDB.Age = student.Age
+	studentDB.GPA = student.GPA
+	studentDB.Street = student.Street
+	studentDB.Province = student.Province
+	studentDB.Country = student.Country
+	
+
+	if err := db.Save(studentDB).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func DeleteStudentById(id int) error{
