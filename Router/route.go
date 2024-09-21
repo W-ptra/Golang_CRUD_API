@@ -9,10 +9,8 @@ import (
 	"github.com/W-ptra/Golang_CRUD_API/Database"
 )
 
-type Address struct{
-	Street 		string 	`json:"street"`
-	Province 	string	`json:"province"`
-	Country 	string	`json:"country"`
+type Message struct{
+	message string `json:"message"`
 }
 
 type Student struct{
@@ -20,61 +18,39 @@ type Student struct{
 	Name 		string	`json:"name"`
 	Age 		int		`json:"age"`
 	GPA 		float64	`json:"gpa"`
-	Address  	Address	`json:"address"`
+	Street 		string 	`json:"street"`
+	Province 	string	`json:"province"`
+	Country 	string	`json:"country"`
+}
+
+func setRespond(w http.ResponseWriter,r *http.Request,payload interface{},statusCode int){
+	w.Header().Set("Content-Type","application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(payload)
 }
 
 func StudentGet(w http.ResponseWriter,r *http.Request){
-	db,err := database.GetConnection()
+	data,err := database.GetStudent()
 	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't get all student"})
+		setRespond(w,r,Message{"Something went wrong"},500)
 		return
 	}
-
-	data,err := database.GetStudent(db)
-	
-	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't get all student"})
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type","application/json")
-	json.NewEncoder(w).Encode(data)
+	setRespond(w,r,data,200)
 }
 
 func StudentGetById(w http.ResponseWriter,r *http.Request){
-
-	studentId,err := strconv.Atoi(r.PathValue("id"))
+	studentId,err := strconv.Atoi(r.PathValue("id")) // get parameter value 
 	if err!=nil{
-		http.Error(w,"Invalid path variable, expected to be Integer",http.StatusBadRequest)
+		setRespond(w,r,Message{"Something went wrong"},400)
 		return
 	}
 
-	db,err := database.GetConnection()
-
+	data,err := database.GetStudentById(studentId)
 	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't get student by id"})
+		setRespond(w,r,Message{"Something went wrong, can't get student by id"},500)
 		return
 	}
-
-	data,err := database.GetStudentById(db,studentId)
-
-	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't get student by id"})
-		return
-	}
-
-	w.Header().Set("Content-Type","application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(data)
+	setRespond(w,r,data,200)
 }
 
 func StudentPost(w http.ResponseWriter,r *http.Request){
@@ -83,49 +59,31 @@ func StudentPost(w http.ResponseWriter,r *http.Request){
 
 	var student Student
 	if err := json.Unmarshal(body,&student);err!=nil{
-		http.Error(w,"Invalid Json",http.StatusBadRequest)
+		setRespond(w,r,Message{"Invalid Json"},500)
 		return
 	}
-
 	log.Println(student)
-	newAddress := database.Address{
-		Street: student.Address.Street,
-		Province: student.Address.Province,
-		Country: student.Address.Country,
-	}
 	newStudent := database.Student{
-		Name: student.Name,
-		Age: student.Age,
-		GPA: student.GPA,
-		Address: newAddress,
+		Name: 		student.Name,
+		Age: 		student.Age,
+		GPA: 		student.GPA,
+		Street: 	student.Street,
+		Province: 	student.Province,
+		Country: 	student.Country,
 	}
-	db,err := database.GetConnection()
-	
-	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't create new student"})
-		return
-	}
-
-	err = database.CreateStudent(db,newStudent)
+	err := database.CreateStudent(newStudent)
 
 	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't create new student"})
+		setRespond(w,r,Message{"Something went wrong, can't create new student"},500)
 		return
 	}
-
-	w.Header().Set("Content-Type","application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message":"successfully created new student"})
+	setRespond(w,r,Message{"successfully created new student"},200)
 }
 
 func StudentPut(w http.ResponseWriter,r *http.Request){
 	studentId,err := strconv.Atoi(r.PathValue("id"))
 	if err!=nil{
-		http.Error(w,"Invalid path variable, expected to be Integer",http.StatusBadRequest)
+		setRespond(w,r,Message{"Invalid path variable, expected to be Integer"},400)
 		return
 	}
 
@@ -134,44 +92,28 @@ func StudentPut(w http.ResponseWriter,r *http.Request){
 
 	var student Student
 	if err:=json.Unmarshal(body,&student);err!=nil{
-		http.Error(w,"Invalid Json",http.StatusBadRequest)
+		setRespond(w,r,Message{"Invalid Json"},400)
 		return
 	}
 	student.Id = studentId
 	log.Println(student)
 
-	db,err := database.GetConnection()
-	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't update student"})
-		return
-	}
-
-	newAddress := database.Address{
-		Street: student.Address.Street,
-		Province: student.Address.Province,
-		Country: student.Address.Country,
-	}
 	newStudent := database.Student{
 		Name: student.Name,
 		Age: student.Age,
 		GPA: student.GPA,
-		Address: newAddress,
+		Street: student.Street,
+		Province: student.Province,
+		Country: student.Country,
 	}
 
-	err = database.UpdateStudentById(db,newStudent)
+	err = database.UpdateStudentById(newStudent)
 
 	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't update student"})
+		setRespond(w,r,Message{"Something went wrong, can't update student"},500)
 		return
 	}
-
-	w.Header().Set("Content-Type","application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message":"successfully update student","studentId":strconv.Itoa(studentId)})
+	setRespond(w,r,Message{"successfully update student"},200)
 }
 
 func StudentDelete(w http.ResponseWriter,r *http.Request){
@@ -180,26 +122,11 @@ func StudentDelete(w http.ResponseWriter,r *http.Request){
 		http.Error(w,"Invalid path variable, expected to be Integer",http.StatusBadRequest)
 		return
 	}
-
-	db,err := database.GetConnection()
-
-	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't delete student"})
-		return
-	}
-
-	err = database.DeleteStudentById(db,studentId)
+	err = database.DeleteStudentById(studentId)
 
 	if err != nil{
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message":"Something went wrong, can't delete student"})
+		setRespond(w,r,Message{"Something went wrong, can't delete student"},500)
 		return
 	}
-
-	w.Header().Set("Content-Type","application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message":"successfully delete student","studentId":strconv.Itoa(studentId)})
+	setRespond(w,r,Message{"successfully delete student"},200)
 }
