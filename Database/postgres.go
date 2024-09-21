@@ -11,7 +11,7 @@ import (
 var dbConnection *gorm.DB
 
 func GetConnection() (*gorm.DB,error){
-	if dbConnection != nil{
+	if dbConnection == nil{
 
 		godotenv.Load()
 		dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=%v TimeZone=Asia/Shanghai", 
@@ -29,6 +29,18 @@ func GetConnection() (*gorm.DB,error){
 		dbConnection = connection
 	}
 	return dbConnection,nil
+}
+
+func Migration(){
+	db,err := GetConnection()
+	if err != nil{
+		fmt.Println("Error to connect to database:\n",err)
+	}
+
+	err = db.AutoMigrate(&Student{})
+	if err != nil{
+		fmt.Println("Error while migrating database:\n",err)
+	}
 }
 
 func CreateStudent(student Student) error{

@@ -10,7 +10,7 @@ import (
 )
 
 type Message struct{
-	message string `json:"message"`
+	Message string `json:"message"`
 }
 
 type Student struct{
@@ -40,14 +40,14 @@ func StudentGet(w http.ResponseWriter,r *http.Request){
 
 func StudentGetById(w http.ResponseWriter,r *http.Request){
 	studentId,err := strconv.Atoi(r.PathValue("id")) // get parameter value 
-	if err!=nil{
-		setRespond(w,r,Message{"Something went wrong"},400)
+	if err !=nil{
+		setRespond(w,r,Message{"Something went wrong"},500)
 		return
 	}
 
 	data,err := database.GetStudentById(studentId)
 	if err != nil{
-		setRespond(w,r,Message{"Something went wrong, can't get student by id"},500)
+		setRespond(w,r,Message{"Student not found"},404)
 		return
 	}
 	setRespond(w,r,data,200)
