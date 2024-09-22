@@ -1,5 +1,39 @@
 # Golang_CRUD_API
 A Simple RESTFUL API build using golang  version 1.22 net/http standard library for performing Cread, Read, Update, Delete (CRUD) operation. GORM for ORM and PostgreSQL for database.  
+# Preprerequisite
+1. Have PostgreSQL installed and run on your machine
+2. Create new database 
+3. Edit ``.env`` by applying your configuration  
+# How To Use
+1. Clone this repo by run following script
+```
+git clone https://github.com/W-ptra/Golang_CRUD_API.git
+```
+2. Change Directory to main folder & Download all dependency
+```
+cd Golang_CRUD_API
+go mod download
+```
+3. Run the main.go & api.go
+```
+go run main.go api.go
+```
+# Using Docker
+Run following script  
+```
+docker run -d -p 8080:8080 \
+	--name golang_crud_api \
+	--network {your_network_name *optional} \
+	-e HOST="0.0.0.0" \
+	-e PORT="8080" \
+	-e DB_HOST="{your postgreSQL host}" \
+	-e DB_PORT="{your postgreSQL port}" \
+	-e DB_USER="{your postgreSQL user}" \
+	-e DB_PASSWORD="{your postgreSQL password}" \
+	-e DB_NAME="{your database name}" \
+	-e DB_SSLMODE="disable" \
+	wisnup001binus/golang_crud_api:1.0
+```
 # API Endpoint
 1. ``GET http://127.0.0.1:8080/api/student``  
 Retrive all student data  
