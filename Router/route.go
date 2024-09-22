@@ -50,6 +50,7 @@ func StudentGetById(w http.ResponseWriter,r *http.Request){
 		setRespond(w,Message{"Student not found"},404)
 		return
 	}
+	log.Printf("get student data %v\n",data)
 	setRespond(w,data,200)
 }
 
@@ -62,7 +63,6 @@ func StudentPost(w http.ResponseWriter,r *http.Request){
 		setRespond(w,Message{"Invalid Json"},500)
 		return
 	}
-	log.Println(student)
 	newStudent := database.Student{
 		Name: 		student.Name,
 		Age: 		student.Age,
@@ -77,6 +77,7 @@ func StudentPost(w http.ResponseWriter,r *http.Request){
 		setRespond(w,Message{"Something went wrong, can't create new student"},500)
 		return
 	}
+	log.Printf("Create New student %v\n",student)
 	setRespond(w,Message{"successfully created new student"},200)
 }
 
@@ -96,8 +97,6 @@ func StudentPut(w http.ResponseWriter,r *http.Request){
 		return
 	}
 	student.Id = studentId
-	log.Println(student)
-
 	newStudent := database.Student{
 		Id: studentId,
 		Name: student.Name,
@@ -114,6 +113,7 @@ func StudentPut(w http.ResponseWriter,r *http.Request){
 		setRespond(w,Message{"student not found"},404)
 		return
 	}
+	log.Printf("update student %v\n",newStudent)
 	setRespond(w,Message{"successfully update student"},200)
 }
 
@@ -129,5 +129,6 @@ func StudentDelete(w http.ResponseWriter,r *http.Request){
 		setRespond(w,Message{"student not found"},404)
 		return
 	}
+	log.Printf("delete student data of id %v\n",studentId)
 	setRespond(w,Message{"successfully delete student"},200)
 }
