@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"github.com/W-ptra/Golang_CRUD_API/Router"
+	"github.com/W-ptra/Golang_CRUD_API/middleware"
 )
 
 type APIServer struct {
@@ -26,7 +27,7 @@ func (s *APIServer) run() error {
 
 	server := http.Server{
 		Addr: s.addr,
-		Handler: router,
+		Handler: middleware.Logger(router),
 	}
 
 	log.Printf("Server has started %s",s.addr)
