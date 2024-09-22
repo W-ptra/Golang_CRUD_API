@@ -1,6 +1,6 @@
 # Golang_CRUD_API
 A Simple RESTFUL API build using golang  version 1.22 net/http standard library for performing Cread, Read, Update, Delete (CRUD) operation. GORM for ORM and PostgreSQL for database.  
-# Preprerequisite
+# Prerequisite
 1. Have PostgreSQL installed and run on your machine
 2. Create new database 
 3. Edit ``.env`` by applying your configuration  
